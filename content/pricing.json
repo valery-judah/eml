@@ -1,0 +1,65 @@
+{
+  "$schema": "./pricing.schema.json",
+  "schemaVersion": 1,
+  "page": {
+    "title": "Engagements & pricing",
+    "description": "Explore EML Systems assessments, implementation projects, and principal advisory. See what each engagement includes and how we agree the fee.",
+    "headline": "Scope first.",
+    "emphasis": "A clear commitment.",
+    "intro": "Choose the kind of support your next decision needs. Each engagement connects a defined question to useful outputs, clear responsibilities, and an agreed fee."
+  },
+  "groups": [
+    { "id": "assessment", "title": "Assessments", "description": "Resolve an important question before committing to the next investment or change." },
+    { "id": "project", "title": "Implementation projects", "description": "Build a defined change and leave your team able to operate and maintain it." },
+    { "id": "advisory", "title": "Ongoing advisory", "description": "Bring independent principal-level judgment to recurring product and engineering decisions." }
+  ],
+  "commercialNotes": [
+    { "title": "What determines the fee", "text": "The question, scope, relevant system paths, available evidence, access requirements, and depth of implementation or review. Fees are quoted in USD. Project totals and monthly advisory fees are agreed for the scope and capacity required." },
+    { "title": "What we agree before starting", "text": "The deliverables, acceptance criteria, responsibilities, fee and currency, schedule, payment terms, and treatment of any third-party costs. These are agreed for your engagement." },
+    { "title": "When the work changes", "text": "New findings may change the useful next step. We review the effect on scope, fee, and timing together before committing to additional work." }
+  ],
+  "offers": [
+    {
+      "id": "focused-assessment",
+      "group": "assessment",
+      "title": "Focused assessment",
+      "summary": "A bounded investigation with findings, explicit uncertainties, and a recommendation. The decision record remains useful when your team carries out the next step itself.",
+      "bestFor": "A consequential investment, release, recurring failure, or architecture question where more evidence would improve the decision.",
+      "outcome": "A decision your team can explain, with the evidence, alternatives, and next action attached.",
+      "includes": ["An agreed question and a review of representative cases and constraints.", "Evidence-linked findings, competing explanations, and the limits of the investigation.", "A decision memo with prioritized interventions or a bounded experiment recommendation."],
+      "excludes": ["A production implementation or comprehensive organizational audit.", "Certification of every possible system behavior or a guaranteed business result."],
+      "clientInputs": ["A decision owner and access to relevant people and representative work.", "Available evidence, operating constraints, and the context needed to interpret them."],
+      "completion": "Your team can distinguish findings from hypotheses, explain the recommended next step, and identify what could change the decision.",
+      "journeyIds": ["choose-an-investment", "investigate-an-existing-system"],
+      "price": { "model": "quote", "currency": null, "amount": null, "minimum": null, "maximum": null, "unit": "engagement", "note": "The assessment fee is scoped in USD around the agreed question, cases, and outputs before work starts." }
+    },
+    {
+      "id": "hands-on-project",
+      "group": "project",
+      "title": "Hands-on engagement",
+      "summary": "Design and implementation alongside your team. Agree on acceptance, review progress through working changes, and transfer the understanding needed to maintain the result.",
+      "bestFor": "A sufficiently clear product or engineering change: an AI application, retrieval path, evaluation capability, integration, or improvement to the development workflow.",
+      "outcome": "Working software, evidence of the supported behavior, and a usable engineering handoff.",
+      "includes": ["A defined implementation boundary with supported cases and acceptance criteria.", "Design and implementation in reviewable increments, with checks appropriate to the agreed behavior.", "A handoff covering design decisions, operation, recovery, dependencies, and remaining limits."],
+      "excludes": ["Unbounded feature development or requirements added without a scope review.", "Ongoing operational support unless it is separately included in the agreement."],
+      "clientInputs": ["A decision owner, an accountable maintainer, and access to the relevant environment.", "Representative inputs, domain review, and time for acceptance and handoff."],
+      "completion": "The agreed behavior is demonstrated against acceptance criteria, remaining limits are recorded, and the receiving team can operate and change the affected system.",
+      "journeyIds": ["build-a-defined-change"],
+      "price": { "model": "quote", "currency": null, "amount": null, "minimum": null, "maximum": null, "unit": "project", "note": "The total project fee is scoped in USD against the implementation boundary, acceptance criteria, and handoff." }
+    },
+    {
+      "id": "principal-advisory",
+      "group": "advisory",
+      "title": "Principal advisory",
+      "summary": "Independent input to recurring product, architecture, evaluation, or ownership decisions. Agree on the decisions and review cadence that make ongoing involvement useful.",
+      "bestFor": "A team with recurring technical decisions that benefits from an independent thinking partner while retaining delivery and operational ownership.",
+      "outcome": "A clearer basis for recurring decisions, with recommendations, responsibilities, and follow-up evidence made explicit.",
+      "includes": ["An agreed set of decision areas and a review cadence matched to the work.", "Review of relevant product, architecture, evaluation, or engineering material.", "Recommendations and decision records with actions, owners, and review triggers."],
+      "excludes": ["An implied full-time delivery role or unlimited availability.", "Incident response, on-call coverage, or implementation unless explicitly scoped."],
+      "clientInputs": ["A responsible decision owner and timely access to the material being reviewed.", "People who can act on recommendations and bring the resulting evidence to a later review."],
+      "completion": "Each review leaves an explicit decision or next investigation, a responsible owner, and a reason to continue, change, or conclude the arrangement.",
+      "journeyIds": ["choose-an-investment", "build-a-defined-change", "investigate-an-existing-system"],
+      "price": { "model": "quote", "currency": null, "amount": null, "minimum": null, "maximum": null, "unit": "month", "note": "The monthly advisory fee is scoped in USD for the agreed decisions, review cadence, and capacity before recurring work starts." }
+    }
+  ]
+}

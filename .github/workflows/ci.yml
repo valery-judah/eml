@@ -1,0 +1,22 @@
+name: Validate site build
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup site toolchain
+        uses: ./.github/actions/setup-site
+      - name: Verify production website
+        run: npm run verify
+      - name: Verify a GitHub Pages project path
+        env:
+          SITE_URL: https://example.github.io/eml/
+        run: npm run verify

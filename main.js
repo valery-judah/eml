@@ -22,7 +22,7 @@ document.addEventListener('keydown', event => {
 document.addEventListener('click', event => {
   if (!event.target.closest('.site-header')) closeMenu();
 });
-window.matchMedia('(min-width: 761px)').addEventListener('change', closeMenu);
+window.matchMedia('(min-width: 1001px)').addEventListener('change', closeMenu);
 
 document.querySelectorAll('.process-trigger').forEach(trigger => {
   trigger.addEventListener('click', () => {
@@ -148,3 +148,32 @@ if (printArticle) {
   printArticle.hidden = false;
   printArticle.addEventListener('click', () => window.print());
 }
+
+document.querySelectorAll('[data-copy-record]').forEach(button => {
+  const record = document.getElementById(button.dataset.copyRecord);
+  const announcement = button.closest('.working-record')?.querySelector('[role="status"]');
+  if (!record || !announcement || !navigator.clipboard?.writeText) return;
+  button.hidden = false;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    try {
+      await navigator.clipboard.writeText(record.textContent);
+      announcement.textContent = 'Working record copied. Paste it into your project.';
+    } catch {
+      announcement.textContent = 'Copy was unavailable. Select and copy the record below.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+});
+
+let recordsOpenedForPrint = null;
+window.addEventListener('beforeprint', () => {
+  if (recordsOpenedForPrint) return;
+  recordsOpenedForPrint = [...document.querySelectorAll('.working-record:not([open])')];
+  recordsOpenedForPrint.forEach(record => { record.open = true; });
+});
+window.addEventListener('afterprint', () => {
+  recordsOpenedForPrint?.forEach(record => { record.open = false; });
+  recordsOpenedForPrint = null;
+});

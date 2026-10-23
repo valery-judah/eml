@@ -1,0 +1,285 @@
+/*
+ * Site configuration. Loaded into the `tokens` cascade layer by styles.css.
+ * Components consume roles, never palette names. Light is the fallback;
+ * theme.js selects the dark overrides before the page is painted. Typography,
+ * spacing, and component CSS are shared between themes.
+ */
+:root {
+  /* Fonts and type scale */
+  --font-body: Arial, Helvetica, sans-serif;
+  --font-editorial: Georgia, 'Times New Roman', serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --type-display: clamp(3.25rem, 5.7vw, 5rem);
+  --type-page: clamp(2.5rem, 5vw, 4rem);
+  --type-section: clamp(2rem, 3.2vw, 2.75rem);
+  --type-entry: clamp(1.5rem, 2.4vw, 1.875rem);
+  --type-card: clamp(1.5rem, 2.1vw, 1.625rem);
+  --type-subheading: clamp(1.25rem, 1.8vw, 1.375rem);
+  --type-lead: clamp(1.0625rem, 1.5vw, 1.1875rem);
+  --type-body: 1rem;
+  --type-copy: .9375rem;
+  --type-small: .875rem;
+  --type-ui: .8125rem;
+  --type-meta: .6875rem;
+  --type-label: .625rem;
+  --type-label-small: .5625rem;
+  --type-label-hero: .59375rem;
+  --type-caption: .5rem;
+  --type-caption-medium: .46875rem;
+  --type-caption-small: .4375rem;
+  --type-caption-compact: .40625rem;
+  --type-caption-fine: .375rem;
+  --weight-regular: 400;
+  --weight-heading: 500;
+  --weight-bold: 700;
+  --leading-display: .99;
+  --leading-heading: 1.1;
+  --leading-title: 1.2;
+  --leading-body: 1.65;
+  --leading-intro: 1.7;
+  --leading-relaxed: 1.75;
+  --leading-copy: 1.8;
+  --leading-reading: 1.85;
+  --leading-article: 1.9;
+  --leading-code: var(--leading-article);
+  --tracking-display: -.066em;
+  --tracking-heading: -.055em;
+  --tracking-title: -.035em;
+  --tracking-label: .065em;
+
+  /* Spacing scale and shared layout dimensions */
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.5rem;
+  --space-10: 3rem;
+  --space-11: 4rem;
+  --space-12: 6rem;
+  --layout-max-width: 80rem;
+  --layout-gutter: 3.5rem;
+  --layout-section-space: 6.125rem;
+  --layout-section-gap: 2.75rem;
+  --layout-header-height: 6.125rem;
+  --layout-reading-width: 46.25rem;
+  --layout-reading-sidebar: 14.0625rem;
+  --layout-article-width: 41.25rem;
+  --layout-anchor-offset: 1.875rem;
+  --control-min-height: 3.0625rem;
+  --control-radius: 0;
+  --radius-round: 50%;
+  --border-width: 1px;
+  --focus-width: 2px;
+  --focus-offset: 5px;
+
+  /* Motion and effects */
+  --duration-fast: 200ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+  --duration-reduced: .01ms;
+  --shadow-nav: 0 14px 20px var(--color-shadow);
+  --backdrop-blur: 4px;
+
+  /* Default light theme: surfaces and text */
+  color-scheme: light;
+  accent-color: var(--color-accent);
+  --color-bg: #f6f4ee;
+  --color-surface: #eceee4;
+  --color-surface-alt: #eaede3;
+  --color-surface-emphasis: #e9ecdf;
+  --color-surface-hover: #e4e9db;
+  --color-field-bg: #fcfbf7;
+  --color-text: #272b24;
+  --color-text-secondary: #626b58;
+  --color-text-muted: #68705e;
+  --color-text-soft: #747c67;
+  --color-text-reading: #515b46;
+  --color-text-decorative: #8b997a;
+  --color-border: #d8d9ce;
+  --color-border-subtle: #dfe2d7;
+  --color-border-strong: #c6cbbd;
+  --color-border-interactive: #a5b195;
+
+  /* Interaction roles: pair foregrounds with their corresponding surfaces */
+  --color-accent: #bf4322;
+  --color-accent-hover: #bf3d1b;
+  --color-accent-bright: #ef663b;
+  --color-on-accent: #fffdf5;
+  --color-selection: #ef663b35;
+  --color-selected-bg: #272b24;
+  --color-on-selected: #f6f4ee;
+  --color-focus: var(--color-accent);
+  --color-overlay: #20251ed1;
+  --color-shadow: #2732240d;
+
+  /* Deliberately contrasting sections, independent of the page background */
+  --color-feature-bg: #282f26;
+  --color-feature-hover: #343d2c;
+  --color-feature-text: #f6f4ee;
+  --color-feature-secondary: #c7cebc;
+  --color-feature-muted: #aeb7a5;
+  --color-feature-soft: #9ba68e;
+  --color-feature-emphasis: #d5ddc7;
+  --color-feature-border: #536048;
+  --color-feature-border-subtle: #444d3d;
+  --color-feature-link-hover: #e6b18f;
+  --color-feature-symbol: #aebf97;
+
+  /* Code and decorative diagrams have their own theme roles */
+  --color-code-bg: #e9ede0;
+  --color-code-text: #35432a;
+  --color-code-border: #cfd7c3;
+  --color-visual-measure: #e8ebdf;
+  --color-visual-production: #e8e5dc;
+  --color-visual-context: #e1e5da;
+  --color-diagram-line: #a9b09b;
+  --color-diagram-fill: #b2bba2;
+  --color-diagram-stroke: #8e9b7d;
+  --color-diagram-accent-line: #ce623e;
+  --color-diagram-wash: #c2c9b025;
+  --color-diagram-wash-strong: #98a68b30;
+  --color-diagram-wash-accent: #e56b3920;
+  --color-diagram-plane: #bbc7ac40;
+  --color-diagram-plane-top: #d0d9c160;
+  --color-diagram-plane-accent: #eb734940;
+
+  /* Vector artwork inherits these when embedded in the homepage. */
+  --art-surface: #f1f2e9;
+  --art-surface-side: #e5e8db;
+  --art-surface-edge: #d8decd;
+  --art-panel: #d9e0ca;
+  --art-panel-inset: #eff1e5;
+  --art-node: #f6f4ee;
+  --art-ink: #6c795f;
+  --art-line: #89927d;
+  --art-grid: #b9c0ac;
+  --art-guide: #c0c5b5;
+  --art-dot: #bcc3b2;
+  --art-shadow: #a9b49b;
+  --art-detail: #6e805d;
+  --art-accent: #e1642f;
+  --art-accent-text: #a84522;
+
+  /* Paper output is kept separate from the active screen theme. */
+  --print-bg: #fff;
+  --print-text: #000;
+  --print-border: #aaa;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #171c18;
+  --color-surface: #202822;
+  --color-surface-alt: #222b24;
+  --color-surface-emphasis: #29342a;
+  --color-surface-hover: #303d32;
+  --color-field-bg: #1c241e;
+  --color-text: #eef1e6;
+  --color-text-secondary: #bec9b5;
+  --color-text-muted: #a6b39d;
+  --color-text-soft: #9aa98f;
+  --color-text-reading: #d1dbc8;
+  --color-text-decorative: #91a482;
+  --color-border: #374536;
+  --color-border-subtle: #303c30;
+  --color-border-strong: #4b5d46;
+  --color-border-interactive: #71866a;
+  --color-accent: #ed936c;
+  --color-accent-hover: #f3a786;
+  --color-accent-bright: #ef996e;
+  --color-on-accent: #20251e;
+  --color-selection: #ed936c40;
+  --color-selected-bg: #c6d4b9;
+  --color-on-selected: #1c241e;
+  --color-focus: #f3ac84;
+  --color-overlay: #080e09cc;
+  --color-shadow: #0000003d;
+  --color-feature-bg: #101812;
+  --color-feature-hover: #202c22;
+  --color-feature-text: #eef1e6;
+  --color-feature-secondary: #c4d1bb;
+  --color-feature-muted: #adbea3;
+  --color-feature-soft: #a3b697;
+  --color-feature-emphasis: #dce6d1;
+  --color-feature-border: #526b49;
+  --color-feature-border-subtle: #354832;
+  --color-feature-link-hover: #f5b99b;
+  --color-feature-symbol: #b5ce9b;
+  --color-code-bg: #1c271e;
+  --color-code-text: #cfdfc3;
+  --color-code-border: #465e3e;
+  --color-visual-measure: #263123;
+  --color-visual-production: #302e25;
+  --color-visual-context: #243028;
+  --color-diagram-line: #718267;
+  --color-diagram-fill: #738966;
+  --color-diagram-stroke: #a3b595;
+  --color-diagram-accent-line: #f1a07a;
+  --color-diagram-wash: #718d543b;
+  --color-diagram-wash-strong: #a2bd8a33;
+  --color-diagram-wash-accent: #ed936c24;
+  --color-diagram-plane: #829d6433;
+  --color-diagram-plane-top: #b1c99635;
+  --color-diagram-plane-accent: #ed936c36;
+  --art-surface: #303d30;
+  --art-surface-side: #263326;
+  --art-surface-edge: #202c20;
+  --art-panel: #46563c;
+  --art-panel-inset: #596d4e;
+  --art-node: #ed936c;
+  --art-ink: #bccdaf;
+  --art-line: #849b77;
+  --art-grid: #53654a;
+  --art-guide: #53654a;
+  --art-dot: #637858;
+  --art-shadow: #080d09;
+  --art-detail: #a5ba92;
+  --art-accent: #ed936c;
+  --art-accent-text: #f5b99b;
+}
+
+/* CSS custom properties cannot be used in media conditions without a build
+ * transform. These breakpoints match the layout rules in styles.css. */
+@media (max-width: 1150px) {
+  :root { --layout-gutter: 2.5rem; }
+}
+@media (max-width: 920px) and (min-width: 761px) {
+  :root { --layout-gutter: 1.75rem; }
+}
+@media (max-width: 760px) {
+  :root {
+    --type-display: clamp(3.25rem, 11vw, 4.5rem);
+    --type-page: clamp(2.5rem, 8.5vw, 3.5rem);
+    --layout-gutter: 1.25rem;
+    --layout-section-space: 3.875rem;
+    --layout-section-gap: 1.875rem;
+    --layout-header-height: 4.875rem;
+  }
+}
+
+/* Body-level overrides beat inherited root theme values, so printing a dark
+ * page still produces readable paper. */
+@media print {
+  body {
+    color-scheme: light;
+    --color-bg: var(--print-bg);
+    --color-surface: var(--print-bg);
+    --color-surface-alt: var(--print-bg);
+    --color-surface-emphasis: var(--print-bg);
+    --color-text: var(--print-text);
+    --color-text-secondary: var(--print-text);
+    --color-text-muted: var(--print-text);
+    --color-text-soft: var(--print-text);
+    --color-text-reading: var(--print-text);
+    --color-accent: var(--print-text);
+    --color-code-bg: var(--print-bg);
+    --color-code-text: var(--print-text);
+    --color-code-border: var(--print-border);
+    --color-border: var(--print-border);
+    --color-border-strong: var(--print-border);
+  }
+}

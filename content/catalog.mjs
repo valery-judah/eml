@@ -4,7 +4,9 @@ import { blogPosts } from './blog.mjs';
 import { papers } from './papers.mjs';
 
 function readingTime(entry) {
-  const words = [entry.standfirst, entry.abstract || '', entry.thesis || '', ...entry.sections.flatMap(section => [section.heading, ...(section.text || []), ...(section.bullets || []), section.code || ''])].join(' ').split(/\s+/).filter(Boolean).length;
+  const practical = entry.practical;
+  const practicalText = practical ? [practical.question, practical.answer, practical.useWhen, practical.title, practical.intro, ...practical.checks, practical.record, practical.completion, practical.limit] : [];
+  const words = [entry.standfirst, entry.abstract || '', entry.thesis || '', ...practicalText, ...entry.sections.flatMap(section => [section.heading, ...(section.text || []), ...(section.bullets || []), section.code || ''])].join(' ').split(/\s+/).filter(Boolean).length;
   return `${Math.max(2, Math.ceil(words / 210))} min read`;
 }
 const originalCategories = ['Product thinking', 'Building AI', 'Building AI'];

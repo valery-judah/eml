@@ -1,0 +1,21 @@
+name: Setup site toolchain
+description: Use the same pinned Node.js and npm versions as the local container
+runs:
+  using: composite
+  steps:
+    - name: Load pinned versions
+      shell: bash
+      run: |
+        source "$GITHUB_ACTION_PATH/../../../.infra/versions.env"
+        echo "NODE_VERSION=$NODE_VERSION" >> "$GITHUB_ENV"
+        echo "NPM_VERSION=$NPM_VERSION" >> "$GITHUB_ENV"
+    - name: Setup Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        package-manager-cache: false
+    - name: Setup npm and install the locked dependency tree
+      shell: bash
+      run: |
+        npm install --global "npm@${NPM_VERSION}"
+        npm ci --ignore-scripts --no-audit --no-fund

@@ -18,6 +18,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/styles.css">
+    <script src="/theme.js"></script>
     <link rel="alternate" type="application/rss+xml" title="EML Systems Blog" href="/feed.xml">
     <script type="module" src="/main.js"></script>
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"EML Systems","url":"https://eml.systems/","email":"hello@eml.systems","description":"Independent consulting in AI product strategy, development, and engineering."}</script>
@@ -29,15 +30,23 @@
         <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true"><path d="M0 0h10v10H0zm13 0h10v10H13zm13 0h10v10H26zM0 13h10v10H0zm13 0h10v10H13zM0 26h10v10H0z"/></svg>
         <span>eml<span class="brand-light">systems</span><span class="brand-period">.</span></span>
       </a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span class="menu-icon"></span><span class="sr-only">Open navigation</span></button>
       <nav id="main-nav" aria-label="Main navigation">
-        <a href="#expertise">Expertise</a>
+        <a href="/working-together/">Working together</a>
+        <a href="/pricing/">Pricing</a>
         <a href="/problems/">Client problems</a>
         <a href="/papers/">Papers</a>
         <a href="/notes/">Technical notes</a>
         <a href="/blog/">Blog</a>
         <a class="nav-contact" href="#contact">Let’s talk <span aria-hidden="true">↗</span></a>
       </nav>
+      <div class="header-controls">
+        <div class="theme-control" data-theme-control hidden>
+          <label class="sr-only" for="color-theme">Color theme</label>
+          <select id="color-theme" data-theme-select title="Color theme — Auto follows your device"><option value="system">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+        </div>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span class="menu-icon"></span><span class="sr-only">Open navigation</span></button>
+      </div>
     </header>
 
     <main id="main">
@@ -47,7 +56,7 @@
           <h1 id="hero-title">AI products.<br>Built for the<br><em>real world.</em></h1>
           <p class="hero-description">From the first question to the system in production. We help teams turn AI capability into useful, dependable products.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#contact">Let’s build something <span aria-hidden="true">↗</span></a>
+            <a class="button button-primary" href="/working-together/">Find your starting point <span aria-hidden="true">↗</span></a>
             <a class="text-link" href="#expertise">Explore our expertise <span aria-hidden="true">↓</span></a>
           </div>
           <p class="hero-footnote"><span class="mini-cross" aria-hidden="true">+</span> INDEPENDENT THINKING. ENGINEERED OUTCOMES.</p>
@@ -122,11 +131,8 @@
 
       <section class="engagements section wrap" id="engagements" aria-labelledby="engagements-title">
         <div class="section-heading"><div><p class="eyebrow section-kicker"><span>03</span> WORKING TOGETHER</p><h2 id="engagements-title">The right support.<br><em>At the right moment.</em></h2></div><p class="section-intro">A specific question, a product to build, or a longer-term engineering partner. We shape the engagement around the work.</p></div>
-        <div class="engagement-list">
-          <a class="engagement" href="#contact" data-enquiry="Focused assessment"><span class="engagement-type">GET CLARITY</span><div><h3>A focused assessment</h3><p>An independent look at your product, architecture, and evidence. Leave with clear findings and a prioritized path forward.</p></div><span class="round-arrow" aria-hidden="true">↗</span></a>
-          <a class="engagement" href="#contact" data-enquiry="Hands-on engagement"><span class="engagement-type">MAKE PROGRESS</span><div><h3>A hands-on engagement</h3><p>Work alongside your team to design, build, or improve an AI product—and leave the engineering capability with you.</p></div><span class="round-arrow" aria-hidden="true">↗</span></a>
-          <a class="engagement" href="#contact" data-enquiry="Principal advisory"><span class="engagement-type">KEEP MOVING</span><div><h3>Ongoing principal advisory</h3><p>A thinking partner for architecture, quality ownership, and release decisions. Connect product and engineering around shared evidence as your system evolves.</p></div><span class="round-arrow" aria-hidden="true">↗</span></a>
-        </div>
+        <div class="engagement-list" data-offer-list></div>
+        <a class="text-link engagement-explore" href="/working-together/#work-products">See starting points, deliverables, and example work <span aria-hidden="true">↗</span></a>
         <div class="principal-note"><div class="principal-monogram" aria-hidden="true">v.</div><p><strong>Principal-led. Personally involved.</strong> EML Systems is an independent consultancy led by Valery. Work directly with the person thinking through your problem and building alongside your team.</p><a class="text-link" href="https://valery.tech/" target="_blank" rel="noopener noreferrer">Meet the thinking behind EML <span aria-hidden="true">↗</span></a></div>
       </section>
 

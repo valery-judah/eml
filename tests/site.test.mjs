@@ -5,9 +5,13 @@ import path from 'node:path';
 import { articles } from '../content/articles.mjs';
 import { publications, collections } from '../content/catalog.mjs';
 import { clientProblems } from '../content/client-problems.mjs';
-import { projectRoot, renderArticle, renderCollection, renderFeed, renderProblems } from '../scripts/render.mjs';
+import { workingTogether, journeyForProblem } from '../content/engagements.mjs';
+import { workProducts } from '../content/work-products.mjs';
+import { readerPaths, readerPathFor } from '../content/reader-paths.mjs';
+import { projectRoot, renderArticle, renderCollection, renderFeed, renderProblems, servicePages } from '../scripts/render.mjs';
+import { site, publicPath } from '../site.config.mjs';
 
-const origin = 'https://eml.systems';
+const origin = site.root;
 const output = path.join(projectRoot, 'dist');
 
 async function filesIn(directory, prefix = '') {
@@ -53,7 +57,7 @@ try {
   throw new Error('The production build is missing. Run npm run build before npm test.', { cause: error });
 }
 const documents = new Map(await Promise.all(inventory
-  .filter(file => /\.(?:html|svg|css|xml|txt|js)$/.test(file))
+  .filter(file => /\.(?:html|svg|css|xml|txt|js)$/.test(file) || file === 'CNAME')
   .map(async file => [file, await readFile(path.join(output, file), 'utf8')])));
 
 test('every publication renders its complete sections, lists, examples, and navigation', () => {
@@ -66,7 +70,7 @@ test('every publication renders its complete sections, lists, examples, and navi
     const collection = collections[article.collection];
     assert.ok(collection, `unknown publication collection: ${article.collection}`);
     const collectionLinks = tags(documents.get(fileFor(collection.route))).filter(tag => tag.name === 'a').map(tag => tag.attrs.href);
-    assert.ok(collectionLinks.includes(article.route), `${article.slug} cannot be discovered through its collection`);
+    assert.ok(collectionLinks.includes(publicPath(article.route)), `${article.slug} cannot be discovered through its collection`);
     const headings = [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
     assert.equal(headings.length, 1, `${file} needs one primary heading`);
     assert.equal(textOf(headings[0][1]), article.title);
@@ -100,6 +104,60 @@ test('every publication renders its complete sections, lists, examples, and navi
     assert.equal(schema.url, `${origin}${article.route}`);
   }
   assert.ok(checkedExamples > 0 && checkedLists > 0, 'the technical-note examples and lists must be exercised');
+});
+
+test('every publication connects to a relevant problem, illustrative example, and engagement scope', () => {
+  assert.deepEqual(Object.keys(readerPaths).sort(), publications.map(entry => entry.slug).sort(), 'every published article needs an intentional reader path, without obsolete mappings');
+  for (const entry of publications) {
+    const path = readerPathFor(entry.slug);
+    assert.ok(path?.problem && path.journey && path.example, `unresolved reader path: ${entry.slug}`);
+    const html = documents.get(fileFor(entry.route));
+    const next = html.match(/<aside class="article-cta reader-next-step"[^>]*>([\s\S]*?)<\/aside>/)?.[1];
+    assert.ok(next, `${entry.slug} must explain a specific next decision`);
+    const links = tags(next).filter(tag => tag.name === 'a').map(tag => tag.attrs.href);
+    for (const destination of [`/problems/#${path.problem.id}`, path.example.route, `${workingTogether.route}#${path.journey.id}`]) assert.ok(links.includes(publicPath(destination)), `${entry.slug} loses its route to ${destination}`);
+    assert.ok(textOf(next).includes(path.exampleContext), `${entry.slug} must explain how its worked example applies`);
+    assert.match(textOf(next), /illustrative work product/i, 'synthetic examples must retain their status when linked from an article');
+    assert.equal(new URL(links.find(href => href.startsWith('mailto:'))).searchParams.get('subject'), `A question about: ${entry.title}`, 'direct enquiries must retain article context');
+    assert.ok(tags(html).some(tag => tag.attrs.href === '#next-decision'), `${entry.slug} needs navigation to its applied next step`);
+    assert.ok(html.includes('aria-label="Related reading"'), 'readers must retain a path to further technical reading');
+  }
+});
+
+test('each practical note leads with an answer and offers an intact, usable working record', () => {
+  for (const note of collections.notes.entries) {
+    const practical = note.practical;
+    const html = documents.get(fileFor(note.route));
+    assert.ok(practical, `${note.slug} needs a practical reference`);
+    const quick = html.match(/<section class="note-quick-start"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+    assert.ok(quick, `${note.slug} needs its answer before the detailed argument`);
+    assert.ok(html.indexOf('class="note-quick-start"') < html.indexOf('class="reading-layout"'));
+    for (const value of [practical.question, practical.answer, practical.useWhen]) assert.ok(textOf(quick).includes(value), `${note.slug} omitted its answer or applicability`);
+    const practice = html.match(/<section class="note-practice"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+    assert.ok(practice, `${note.slug} needs a usable checklist and record`);
+    assert.ok(practical.checks.length >= 3 && practical.record.includes('\n'), `${note.slug} needs substantive application guidance`);
+    assert.ok(/<details class="working-record">/.test(practice), 'the record must be available through native disclosure without JavaScript');
+    const pre = practice.match(/<pre\b([^>]*)><code>([\s\S]*?)<\/code><\/pre>/);
+    assert.ok(pre, `${note.slug} needs selectable plain text`);
+    assert.equal(decodeEntities(pre[2]), practical.record, `${note.slug} changed the copyable record or its whitespace`);
+    assert.equal(attributes(pre[1]).tabindex, '0', 'wide records need keyboard scrolling');
+    const copy = tags(practice).find(tag => tag.name === 'button' && tag.attrs['data-copy-record']);
+    assert.equal(copy?.attrs['data-copy-record'], attributes(pre[1]).id, 'copy must target the actual plain-text record');
+    assert.ok(tags(practice).some(tag => tag.attrs.role === 'status' && tag.attrs['aria-live'] === 'polite'), 'copy results need an accessible announcement');
+    for (const value of [practical.completion, practical.limit]) assert.ok(textOf(practice).includes(value), `${note.slug} needs completion criteria and declared limits`);
+    for (const target of ['#quick-answer', '#working-record']) assert.ok(tags(html).some(tag => tag.attrs.href === target), `${note.slug} lacks navigation to ${target}`);
+  }
+  for (const article of publications.filter(entry => entry.collection !== 'notes')) assert.ok(!documents.get(fileFor(article.route)).includes('class="note-quick-start"'), 'papers and essays should retain their own opening structure');
+});
+
+test('working record text and practical guidance remain escaped in the rendered note', async () => {
+  const unsafe = '</code></pre><img data-injected="true"> & </script><script data-injected="true">alert(1)</script>';
+  const note = collections.notes.entries[0];
+  const practical = Object.fromEntries(Object.keys(note.practical).map(key => [key, key === 'checks' ? [unsafe] : unsafe]));
+  const html = await renderArticle({ ...note, practical });
+  assert.ok(!tags(html).some(tag => tag.attrs['data-injected'] === 'true'), 'practical content introduced an HTML element');
+  const record = html.match(/<pre\b[^>]*id="working-record-text"[^>]*><code>([\s\S]*?)<\/code><\/pre>/)?.[1];
+  assert.equal(decodeEntities(record), unsafe, 'copyable content must preserve literal source text');
 });
 
 test('papers develop a substantial argument with examples, methods, objections, and declared limits', () => {
@@ -192,7 +250,7 @@ test('the client problems page publishes motivations, diagnostic work, next deci
     assert.ok(problem.questions.length >= 3 && problem.work.length >= 3, `${problem.id} needs diagnostic questions and reviewable work`);
     const reading = caseHtml.match(/<nav class="problem-reading"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
     assert.ok(reading, `${problem.id} needs supporting reasoning and methods`);
-    assert.deepEqual(tags(reading).filter(tag => tag.name === 'a').map(tag => tag.attrs.href), problem.reading);
+    assert.deepEqual(tags(reading).filter(tag => tag.name === 'a').map(tag => tag.attrs.href), problem.reading.map(route => publicPath(route)));
     for (const route of problem.reading) assert.ok(publications.some(entry => entry.route === route), `${problem.id} links to unpublished reading: ${route}`);
     const contact = tags(caseHtml).find(tag => tag.name === 'a' && tag.attrs.href?.startsWith('mailto:'));
     assert.equal(new URL(contact.attrs.href).searchParams.get('subject'), `Let's discuss: ${problem.title}`, `${problem.id} enquiry subject must preserve its context`);
@@ -212,7 +270,60 @@ test('the client problems page publishes motivations, diagnostic work, next deci
   assert.equal(schema.name, clientProblems.title);
   assert.equal(schema.description, clientProblems.description);
   assert.equal(schema.url, `${origin}/problems/`);
-  assert.ok(tags(documents.get('index.html')).some(tag => tag.name === 'a' && tag.attrs.href === '/problems/'), 'the homepage must make the client problems page discoverable');
+  assert.ok(tags(documents.get('index.html')).some(tag => tag.name === 'a' && tag.attrs.href === publicPath('/problems/')), 'the homepage must make the client problems page discoverable');
+});
+
+test('all client situations lead to an engagement with usable outputs and a stopping point', () => {
+  const html = documents.get(fileFor(workingTogether.route));
+  assert.ok(html, 'working together must be available as a complete static page');
+  const homepage = documents.get('index.html');
+  assert.ok(tags(homepage).some(tag => tag.name === 'a' && tag.attrs.href === publicPath(workingTogether.route)), 'visitors must be able to find the starting points from the homepage');
+  const problems = documents.get('problems/index.html');
+  const assignedIds = workingTogether.journeys.flatMap(journey => journey.problemIds);
+  assert.deepEqual(assignedIds.slice().sort(), clientProblems.problems.map(problem => problem.id).sort(), 'each client situation needs one primary starting point');
+  for (const problem of clientProblems.problems) {
+    const journey = journeyForProblem(problem.id);
+    const destination = `${workingTogether.route}#${journey.id}`;
+    const source = problems.match(new RegExp(`<article class="problem-case" id="${problem.id}">([\\s\\S]*?)<\\/article>`))?.[1];
+    assert.ok(tags(source).some(tag => tag.name === 'a' && tag.attrs.href === publicPath(destination)), `${problem.id} needs a route to the relevant scope and work products`);
+  }
+  for (const journey of workingTogether.journeys) {
+    const body = html.match(new RegExp(`<article class="journey-detail" id="${journey.id}">([\\s\\S]*?)<\\/article>`))?.[1];
+    assert.ok(body, `missing starting point: ${journey.id}`);
+    const labels = [...body.matchAll(/<dt>([^<]+)<\/dt>/g)].map(([, label]) => textOf(label));
+    for (const label of ['What you contribute', 'What you receive', 'Scope and boundaries', 'How we assess completion', 'Your next decision']) assert.ok(labels.includes(label), `${journey.id} must explain ${label.toLowerCase()}`);
+    assert.ok(tags(body).some(tag => tag.name === 'a' && workProducts.some(example => publicPath(example.route) === tag.attrs.href)), `${journey.id} needs inspectable example work`);
+  }
+  assert.match(textOf(html), /proceed|internally|stop/i, 'a client must have a useful stopping point');
+});
+
+test('illustrative work products disclose their status and preserve usable evidence tables', () => {
+  const htmlForWorking = documents.get(fileFor(workingTogether.route));
+  for (const example of workProducts) {
+    const file = fileFor(example.route);
+    const html = documents.get(file);
+    assert.ok(html, `missing complete work product: ${example.slug}`);
+    assert.ok(tags(htmlForWorking).some(tag => tag.name === 'a' && tag.attrs.href === publicPath(example.route)), `${example.slug} needs a public entry point`);
+    const notice = html.match(/<aside class="example-notice"[^>]*>([\s\S]*?)<\/aside>/)?.[1];
+    assert.match(textOf(notice || ''), /synthetic example/i, `${example.slug} must distinguish the example from client evidence`);
+    assert.ok(html.indexOf('class="example-notice"') < html.indexOf('class="example-decision"'), 'disclose the scenario status before the recommendation');
+    assert.equal([...html.matchAll(/<h1\b/g)].length, 1, `${example.slug} needs one primary heading`);
+    assert.match(textOf(html.match(/<title>([\s\S]*?)<\/title>/)?.[1] || ''), /^Illustrative work product:/);
+    assert.equal(structuredData(html).articleSection, 'Illustrative work products');
+    assert.ok(textOf(html).includes(example.recommendation), `${example.slug} must state the actual decision`);
+    assert.ok(example.sections.some(section => /limits|cannot conclude/i.test(section.heading)), `${example.slug} must make its limits explicit`);
+    const tables = example.sections.filter(section => section.table).map(section => section.table);
+    assert.ok(tables.length >= 2, `${example.slug} needs inspectable evidence and alternatives or interventions`);
+    const renderedTables = [...html.matchAll(/<div class="work-table-scroll"([^>]*)><table class="work-table">([\s\S]*?)<\/table><\/div>/g)];
+    assert.equal(renderedTables.length, tables.length, `${example.slug} omitted an evidence table`);
+    renderedTables.forEach(([, attrs, body], index) => {
+      assert.equal(attributes(attrs).tabindex, '0', 'wide tables need keyboard access to horizontal scrolling');
+      assert.equal(attributes(attrs)['aria-label'], tables[index].caption);
+      assert.equal(textOf(body.match(/<caption\b[^>]*>([\s\S]*?)<\/caption>/)?.[1] || ''), tables[index].caption);
+      assert.equal(tags(body).filter(tag => tag.name === 'th' && tag.attrs.scope === 'col').length, tables[index].columns.length);
+      assert.equal(tags(body).filter(tag => tag.name === 'th' && tag.attrs.scope === 'row').length, tables[index].rows.length);
+    });
+  }
 });
 
 test('collection pages expose exactly their catalog entries and usable topic/search metadata', async () => {
@@ -223,7 +334,7 @@ test('collection pages expose exactly their catalog entries and usable topic/sea
     const html = documents.get(file);
     assert.ok(html, `missing collection: ${file}`);
     assert.equal(html, await renderCollection(key), `${file} is stale relative to the catalog`);
-    assert.ok(homepageLinks.includes(collection.route), `the homepage must lead to ${collection.title}`);
+    assert.ok(homepageLinks.includes(publicPath(collection.route)), `the homepage must lead to ${collection.title}`);
     const expected = publications.filter(entry => entry.collection === key);
     assert.deepEqual(collection.entries.map(entry => entry.route), expected.map(entry => entry.route), `${key} catalog membership diverged`);
     membership.push(...collection.entries.map(entry => entry.route));
@@ -238,7 +349,7 @@ test('collection pages expose exactly their catalog entries and usable topic/sea
         assert.ok(metadata['data-search']?.includes(term), `${entry.slug} cannot be searched by ${term}`);
       }
       const links = tags(cardHtml).filter(tag => tag.name === 'a').map(tag => tag.attrs.href);
-      assert.deepEqual([...new Set(links)], [entry.route], `${entry.slug} card links to a different entry`);
+      assert.deepEqual([...new Set(links)], [publicPath(entry.route)], `${entry.slug} card links to a different entry`);
       const cardTags = cardHtml.match(/<ul class="publication-tags"[^>]*>([\s\S]*?)<\/ul>/)?.[1];
       assert.ok(cardTags, `${entry.slug} needs visible topics`);
       assert.deepEqual([...cardTags.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(([, tag]) => textOf(tag)), entry.tags);
@@ -273,7 +384,7 @@ test('page routes, canonical metadata, and sitemap describe the same unique publ
   for (const slug of slugs) assert.match(slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, `unsafe article route: ${slug}`);
 
   const routes = inventory.filter(file => file.endsWith('.html') && file !== '404.html').map(routeFor);
-  const expectedRoutes = ['/', '/problems/', ...Object.values(collections).map(collection => collection.route), ...publications.map(entry => entry.route)].sort();
+  const expectedRoutes = ['/', ...servicePages.map(page => page.route), ...Object.values(collections).map(collection => collection.route), ...publications.map(entry => entry.route)].sort();
   assert.equal(new Set(expectedRoutes).size, expectedRoutes.length, 'catalog routes collide');
   for (const entry of publications) assert.match(entry.route, /^\/(?:notes|blog|writing|papers)\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/, `unsafe publication route: ${entry.route}`);
   assert.deepEqual(routes.sort(), expectedRoutes);
@@ -294,7 +405,7 @@ test('page routes, canonical metadata, and sitemap describe the same unique publ
   const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => decodeEntities(url));
   assert.equal(new Set(locations).size, locations.length, 'duplicate sitemap locations');
   assert.deepEqual(locations.sort(), canonicalUrls.sort(), 'sitemap omits or invents public pages');
-  assert.match(documents.get('robots.txt'), /Sitemap: https:\/\/eml\.systems\/sitemap\.xml/);
+  assert.ok(documents.get('robots.txt').includes(`Sitemap: ${origin}/sitemap.xml`));
   assert.ok(tags(documents.get('404.html')).some(tag => tag.attrs.name === 'robots' && tag.attrs.content === 'noindex'));
 });
 
@@ -326,7 +437,7 @@ test('RSS publishes every blog entry once with its actual canonical URL and esca
   assert.equal(new Set(links).size, links.length, 'duplicate feed items');
   for (const entry of publications.filter(entry => entry.collection !== 'blog')) assert.ok(!links.includes(`${origin}${entry.route}`), 'notes and papers should not enter the blog feed');
   for (const collection of Object.values(collections)) {
-    assert.ok(tags(documents.get(fileFor(collection.route))).some(tag => tag.name === 'link' && tag.attrs.rel === 'alternate' && tag.attrs.type === 'application/rss+xml' && tag.attrs.href === '/feed.xml'), 'collection pages need RSS discovery metadata');
+    assert.ok(tags(documents.get(fileFor(collection.route))).some(tag => tag.name === 'link' && tag.attrs.rel === 'alternate' && tag.attrs.type === 'application/rss+xml' && tag.attrs.href === publicPath('/feed.xml')), 'collection pages need RSS discovery metadata');
   }
 });
 
@@ -342,11 +453,12 @@ test('internal links, assets, SVG references, and interactive targets all resolv
   let checkedReferences = 0;
   function checkReference(reference, from) {
     assert.ok(reference.trim(), `${from} has an empty reference`);
-    const base = new URL(from.endsWith('.html') ? routeFor(from) : `/${from}`, origin);
+    const base = new URL(publicPath(from.endsWith('.html') ? routeFor(from) : `/${from}`), site.origin);
     const url = new URL(reference, base);
     assert.ok(['http:', 'https:', 'mailto:', 'tel:', 'data:'].includes(url.protocol), `${from} uses an unexpected URL scheme: ${url.protocol}`);
-    if (url.origin !== origin) return;
-    let target = decodeURIComponent(url.pathname).replace(/^\//, '');
+    if (url.origin !== site.origin) return;
+    assert.ok(url.pathname.startsWith(`${site.basePath}/`), `${from} escapes the configured site path: ${reference}`);
+    let target = decodeURIComponent(url.pathname.slice(site.basePath.length)).replace(/^\//, '');
     if (!target || target.endsWith('/')) target += 'index.html';
     if (!inventory.includes(target) && inventory.includes(`${target}/index.html`)) target += '/index.html';
     assert.ok(inventory.includes(target), `${from} references a missing file: ${reference}`);
@@ -467,15 +579,67 @@ test('paper rendering rejects unsafe reference destinations and unresolved citat
   await assert.rejects(renderArticle({ ...base, references: [], sections: [{ heading: 'Unresolved citation', text: ['The cited source must exist.'], citations: ['absent-reference'] }] }), /Unknown reference: absent-reference/);
 });
 
+test('shared style configuration is published and all component and artwork tokens resolve', () => {
+  const styles = documents.get('styles.css');
+  const config = documents.get('theme.css');
+  assert.ok(config, 'the configuration must be included in the deploy output');
+  assert.ok(styles.includes(`@import url("${publicPath('/theme.css')}") layer(tokens)`), 'every page must load the shared configuration');
+  assert.doesNotMatch(styles, /#[\da-f]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch)\(/i, 'component colors must use theme roles');
+  const declarations = [...config.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)];
+  const defined = new Set(declarations.map(([, name]) => name));
+  const sources = [styles, config, documents.get('assets/system.svg')];
+  for (const source of sources) {
+    for (const [, name] of source.matchAll(/var\(\s*(--[\w-]+)/g)) {
+      assert.ok(defined.has(name), `undefined style token: ${name}`);
+    }
+  }
+  // Cycles invalidate custom properties at computed-value time, even if every
+  // referenced name exists. Check dependency chains, including print aliases.
+  const dependencies = new Map();
+  for (const [, name, value] of declarations) {
+    const references = [...value.matchAll(/var\(\s*(--[\w-]+)/g)].map(([, ref]) => ref);
+    dependencies.set(name, [...(dependencies.get(name) || []), ...references]);
+  }
+  function visit(name, chain = []) {
+    assert.ok(!chain.includes(name), `cyclic style tokens: ${[...chain, name].join(' → ')}`);
+    for (const reference of dependencies.get(name) || []) visit(reference, [...chain, name]);
+  }
+  for (const name of defined) visit(name);
+  const homepage = documents.get('index.html');
+  assert.match(homepage, /<svg class="system-art" role="img" aria-labelledby="system-art-title"/, 'the illustration must inherit page theme tokens');
+  assert.match(homepage, /<title id="system-art-title">[^<]+<\/title>/, 'the inline illustration needs an accessible description');
+});
+
+test('every page selects its theme in the head and all site headers offer the same control', () => {
+  assert.ok(documents.has('theme.js'), 'theme selection must ship with the static build');
+  for (const [file, html] of documents) {
+    if (!file.endsWith('.html')) continue;
+    const head = html.match(/<head>([\s\S]*?)<\/head>/)?.[1];
+    const script = tags(head).find(tag => tag.name === 'script' && tag.attrs.src === publicPath('/theme.js'));
+    assert.ok(script, `${file} needs theme initialization before body content`);
+    const scriptTag = head.match(/<script\b[^>]*src="[^"]*\/theme\.js"[^>]*>/)?.[0];
+    assert.doesNotMatch(scriptTag, /\s(?:defer|async)\b|\stype\s*=/, `${file} must initialize its theme synchronously`);
+    assert.ok(head.indexOf('/styles.css') < head.indexOf('/theme.js'), 'theme metadata must read the loaded CSS palette');
+    assert.ok(tags(head).some(tag => tag.name === 'meta' && tag.attrs.name === 'theme-color'));
+    if (file === '404.html') continue;
+    const selector = html.match(/<select id="color-theme"[^>]*>([\s\S]*?)<\/select>/)?.[1];
+    assert.ok(selector, `${file} omits the header theme selector`);
+    assert.deepEqual(tags(selector).filter(tag => tag.name === 'option').map(tag => tag.attrs.value), ['system', 'light', 'dark']);
+  }
+});
+
 test('deployment contains public artifacts only, without notes, source modules, or local paths', () => {
-  const publicFiles = new Set(['index.html', '404.html', 'styles.css', 'main.js', 'robots.txt', 'sitemap.xml', 'feed.xml', 'problems/index.html', ...Object.values(collections).map(collection => fileFor(collection.route)), ...publications.map(entry => fileFor(entry.route))]);
+  const publicFiles = new Set(['index.html', '404.html', 'styles.css', 'theme.css', 'theme.js', 'main.js', 'robots.txt', 'sitemap.xml', 'feed.xml', '.nojekyll', ...(site.customDomain ? ['CNAME'] : []), ...servicePages.map(page => fileFor(page.route)), ...Object.values(collections).map(collection => fileFor(collection.route)), ...publications.map(entry => fileFor(entry.route))]);
   const privateSources = [...new Set([...publications.flatMap(entry => entry.sourceNotes || []), ...clientProblems.sourceNotes])];
   assert.ok(privateSources.length > 0, 'private source references must be represented in this audit');
   for (const file of inventory) {
     const publicAsset = /^assets\/[a-z0-9/_.-]+\.(?:svg|png|jpe?g|webp|avif|ico|woff2?)$/i.test(file);
     assert.ok(publicFiles.has(file) || publicAsset, `unexpected deploy artifact: ${file}`);
-    assert.doesNotMatch(file, /(?:^|\/)(?:\.|content\/|scripts\/|tests\/|node_modules\/)|\.(?:md|mjs|map|toml|env)$/i, `source or private file in deploy output: ${file}`);
+    if (file !== '.nojekyll') assert.doesNotMatch(file, /(?:^|\/)(?:\.|content\/|scripts\/|tests\/|node_modules\/)|\.(?:md|mjs|map|toml|env)$/i, `source or private file in deploy output: ${file}`);
   }
+  assert.ok(inventory.includes('.nojekyll'), 'Pages must serve the generated website directly');
+  assert.equal(inventory.includes('CNAME'), Boolean(site.customDomain), 'only a build for the confirmed custom domain should contain CNAME');
+  if (site.customDomain) assert.equal(documents.get('CNAME') || '', `${site.customDomain}\n`);
   for (const [file, source] of documents) {
     assert.doesNotMatch(source, /\/Users\/|\/home\/[^/]+\/|file:\/\/|\/notes\/(?:ai|ai-engineering|var)\//, `local source path leaked into ${file}`);
     assert.ok(!source.includes('sourceNotes'), `private editorial field leaked into ${file}`);

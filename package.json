@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "description": "EML Systems — AI product strategy, development, and engineering.",
+  "packageManager": "npm@11.13.0",
   "scripts": {
-    "dev": "node scripts/server.mjs",
+    "dev": "node --watch scripts/server.mjs",
     "build": "node scripts/build.mjs",
     "preview": "node scripts/server.mjs --dist",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "verify": "node scripts/verify-site.mjs"
   },
   "engines": { "node": ">=20" }
 }

@@ -5,6 +5,23 @@ export const techNotes = [
     category: 'Evaluation',
     standfirst: 'Build cases that exercise meaningful product situations. Make the relationship between the decision, the coverage, and the claims explicit.',
     tags: ['Evaluation design', 'Test cases', 'Product behavior'],
+    practical: {
+      question: 'What does useful coverage require?',
+      answer: 'Start with the decision and the behavior it depends on. Choose realistic cases that exercise supported situations, important boundaries, and known failures. Preserve the fixture, expected condition, and judgment evidence for each case, then state which conclusions the selection can support.',
+      useWhen: 'Use this when planning a release comparison or revising a case set whose purpose is unclear. Coverage review can expose untested situations; estimating their live frequency requires an appropriate population sample.',
+      title: 'Build a coverage decision record',
+      intro: 'Use these checks before adding more examples. The output should connect each material claim to a case and the evidence needed to assess it.',
+      checks: [
+        'Name the decision, owner, supported scope, and behavior the evidence must examine.',
+        'List situations that change the expected behavior. Include ordinary work, consequential boundaries, regressions, and useful successful contrasts.',
+        'Check that each fixture actually creates its stated situation and that the expected condition is separate from the judgment rule.',
+        'Record how cases were selected, which requirement each covers, and what was excluded.',
+        'Decide how missing observations, unknown outcomes, and reviewer disagreement will affect the recommendation.'
+      ],
+      record: '# Evaluation coverage decision record\n\nDecision and owner:\nSupported users, tasks, and conditions:\nBehavioral claim under review:\nCase-set purpose: diagnosis / regression / comparison / population estimate\n\n## Coverage row — repeat for each material situation\nSituation and why it matters:\nInput and state fixture:\nExpected condition:\nJudgment rule and required evidence:\nCase IDs and source or construction method:\nSuccessful contrast or boundary case:\n\n## Scope and next decision\nSelection method and relevant population:\nExclusions and missing observations:\nUnknown outcomes and how they will be handled:\nWhat result would change the recommendation:\nCase, system, and data versions:\nRecommendation, uncertainty, owner, and review date:\n',
+      completion: 'Leave with an inspectable map from a decision to claims, situations, cases, and evidence, plus the gaps that could still change the recommendation.',
+      limit: 'This record organizes coverage. A completed checklist or a large case count does not establish production prevalence or justify a release by itself.'
+    },
     sourceNotes: ['ai-engineering/evaluation/v2/10-evaluation-coverage.md', 'ai-engineering/evaluation/v2/ai-evaluation.md'],
     sections: [
       {
@@ -64,6 +81,23 @@ export const techNotes = [
     category: 'Evaluation',
     standfirst: 'Trace the first observable departure from expected behavior, follow its consequences, and preserve the questions the evidence cannot yet answer.',
     tags: ['Failure analysis', 'Observability', 'Product behavior'],
+    practical: {
+      question: 'Where should a failure investigation begin?',
+      answer: 'Reconstruct the execution and establish the expectation before naming the failure. Locate the earliest divergence the retained evidence demonstrates, follow its consequences, and keep causal explanations as hypotheses until another observation or intervention distinguishes them.',
+      useWhen: 'Use this for a recurring incident, a disputed failure, or a patch that keeps moving the symptom. When the trace or product expectation is missing, the first useful finding may be an evidence or intent gap.',
+      title: 'Write a trace-linked failure record',
+      intro: 'Choose one representative execution. Another reviewer should be able to recover the finding from the linked artefacts and understand what remains unresolved.',
+      checks: [
+        'Retain the relevant input, state, retrieved material, proposed actions, confirmations, tool results, and final effects with versions.',
+        'State the applicable expectation and its owner. Separate confirmed failure, evidence gap, and unresolved product intent.',
+        'Identify the first demonstrated divergence and distinguish it from propagation and the user consequence.',
+        'Compare a successful contrast and record what does and does not belong in this failure category.',
+        'List competing explanations and the next evidence that could distinguish them before assigning a broad fix.'
+      ],
+      record: '# Trace-linked failure record\n\nCase ID and trace location:\nTask, user, environment, and relevant versions:\nApplicable expectation and owner:\nJudgment: confirmed failure / evidence gap / intent gap\n\n## What the evidence shows\nInitial condition and relevant state:\nEarliest demonstrated divergence and evidence link:\nPropagation through later steps:\nObserved user or system consequence:\nMissing or contradictory observations:\nSuccessful contrast and category boundary:\n\n## What to investigate next\nCause hypothesis A and distinguishing evidence:\nCause hypothesis B and distinguishing evidence:\nProposed observation, experiment, or intervention:\nRegression case and validation method:\nNext decision, owner, and review date:\n',
+      completion: 'Leave with a finding someone else can inspect and a specific next action: clarify intent, capture evidence, test an explanation, or validate an intervention.',
+      limit: 'A convincing trace establishes observed behavior within its scope. It does not automatically identify a root cause or estimate how often the failure occurs in production.'
+    },
     sourceNotes: ['ai-engineering/evaluation/v2/failure-understanding.md', 'ai-engineering/evaluation/v2/failures-putting-into-use.md'],
     sections: [
       {
@@ -123,6 +157,23 @@ export const techNotes = [
     category: 'Systems design',
     standfirst: 'Preserve the path from source material to working context so a team can understand omissions, test transformations, and verify the resulting task.',
     tags: ['Retrieval', 'Context engineering', 'Provenance'],
+    practical: {
+      question: 'What must an inspectable retrieval path retain?',
+      answer: 'Start with the consuming task and preserve the route from source occurrence to assembled input: source identity and revision, representation, query, candidates, selection, and transformations. Evaluate whether the required information survives and whether the resulting task succeeds.',
+      useWhen: 'Use this when designing a retrieval route or investigating a missing qualification, stale source, or unsupported answer. It helps locate the next comparison; relevance alone cannot establish task success or source authority.',
+      title: 'Record one inspectable retrieval comparison',
+      intro: 'Trace a meaningful task through the existing route before adding another ranking, filtering, or compression step.',
+      checks: [
+        'Define the next consumer, the information it needs, and the evidence that would be sufficient for the task.',
+        'Verify that source identity, version, location, permissions, and material qualifications survive representation.',
+        'Retain acquisition, selection, and assembly outputs so an omission can be located.',
+        'Compare one consequential change on stable source snapshots and realistic cases; inspect removed material as well as retained material.',
+        'Review the assembled input and accepted task outcome alongside human effort, latency, cost, and unresolved gaps.'
+      ],
+      record: '# Retrieval comparison record\n\nConsumer and task:\nRequired information and sufficiency criteria:\nSource scope, permissions, and snapshot:\nSource IDs, revisions, and original locations:\n\n## Existing route\nRepresentation and transformations:\nQuery and acquisition method:\nCandidate manifest and selection reasons:\nAssembly, expansion, or compression:\nActual input manifest and source links:\nObserved omission or unsupported use:\n\n## Proposed comparison\nOne change and the hypothesis it tests:\nCases, important boundaries, and comparison conditions:\nRequired information retained or lost:\nAccepted task result and human review effort:\nLatency, operating cost, and maintenance implications:\nRecommendation, remaining gaps, owner, and review date:\n',
+      completion: 'Leave with a recoverable route, an explained information gap or justified change, and evidence about the task the context must support.',
+      limit: 'Provenance makes the path inspectable. It does not make a source correct, grant access, or guarantee that the model will use the information appropriately.'
+    },
     sourceNotes: ['ai-engineering/retrieval/retrieval-design.md', 'ai-engineering/retrieval/model-representation-design.md', 'ai-engineering/context-engineering/ce-review.md'],
     sections: [
       {
@@ -183,6 +234,23 @@ export const techNotes = [
     category: 'Engineering practice',
     standfirst: 'Treat maintainers’ understanding as an acceptance requirement. Make context, review, and executable feedback support that responsibility.',
     tags: ['Coding agents', 'Project ownership', 'Review'],
+    practical: {
+      question: 'What makes an agent-written change acceptable?',
+      answer: 'An accountable maintainer must connect the change to intended behavior, system constraints, and relevant failure paths. Use repository context and executable checks to support that judgment, and resolve material comprehension gaps before dependent work accumulates.',
+      useWhen: 'Use this for an agent-assisted change or a growing review queue. Match review depth to consequence: a core state transition needs stronger understanding than a contained disposable script.',
+      title: 'Prepare an agent-change acceptance record',
+      intro: 'Use the record to connect a task, its boundaries, the resulting diff, and the maintainer’s acceptance. Keep the evidence proportional to the change.',
+      checks: [
+        'Name the behavior to change, invariants to preserve, canonical sources, and the accountable maintainer.',
+        'Keep the task boundary reviewable and identify conditions that require a scope discussion.',
+        'Inspect the actual diff, dependencies, state changes, and retry or recovery paths; verify material claims in the agent’s explanation.',
+        'Use checks capable of challenging the implementation and record important behavior they do not cover.',
+        'Record acceptance or unresolved gaps, plus preparation, intervention, review, and relevant later rework when assessing workflow improvement.'
+      ],
+      record: '# Agent-assisted change acceptance record\n\nChange and intended behavior:\nOwner and receiving maintainer:\nInvariants, permissions, and supported boundaries:\nCanonical implementation and repository state:\nTask scope and escalation conditions:\n\n## Reviewable evidence\nDiff or change reference:\nMaintainer explanation of the affected behavior:\nFailure, retry, and recovery paths inspected:\nValidation performed, results, and coverage limits:\nUnrequested changes or new dependencies and justification:\nMaterial comprehension gaps and resolution:\n\n## Acceptance and learning\nDecision: accept / revise / investigate\nPreparation, intervention, review, and rework observations:\nRepository improvement suggested by a recurring mistake:\nRemaining work, owner, and reconsideration trigger:\n',
+      completion: 'Leave with an accepted change whose important behavior the receiving maintainer can explain, or a clearly scoped reason to revise or investigate it.',
+      limit: 'A completed record, passing tests, or a plausible agent explanation cannot replace independent engineering judgment about the affected system.'
+    },
     sourceNotes: ['ai-engineering/coding-agents/project-ownership.md', 'ai-engineering/coding-agents/comprehension.md', 'ai-engineering/coding-agents/agents-md.md'],
     sections: [
       {
@@ -243,6 +311,23 @@ export const techNotes = [
     category: 'Engineering practice',
     standfirst: 'Choose a learning objective, a credible comparison, and an outcome that reflects accepted work. Preserve enough context to revise the recommendation.',
     tags: ['Experiments', 'Engineering methods', 'Decision making'],
+    practical: {
+      question: 'What makes an experiment worth running?',
+      answer: 'Name a choice you are prepared to revise, a comparison that can address it, and an accepted outcome that matters. Set interpretation and revision rules before looking at results, then retain the conditions, failures, and uncertainty behind the recommendation.',
+      useWhen: 'Use this before committing to an AI feature, repository change, retrieval intervention, or evaluation approach. When the mechanism is unclear, an exploratory observation may be the useful first step.',
+      title: 'Write a decision-focused experiment record',
+      intro: 'Keep the record short enough to use during the work. Its purpose is to prevent the decision, outcome, or comparison from shifting unnoticed.',
+      checks: [
+        'State the decision, owner, alternatives, and the observation that could change direction.',
+        'Choose a learning objective and a method that can answer it; separate exploration from claims about an intervention’s effect.',
+        'Define a primary outcome, acceptance criteria, guardrails, and comparable task and configuration conditions.',
+        'Retain unsuccessful runs, interventions, deviations, and observations that challenge the preferred explanation.',
+        'Assess effect, variability, relevance, cost, and evidence limits before choosing to retain, modify, investigate further, or stop.'
+      ],
+      record: '# Decision-focused experiment record\n\nDecision, owner, and timing:\nAlternatives under consideration:\nLearning objective or hypothesis:\nFinding that would change the decision:\n\n## Design before execution\nTask population and selected cases:\nBaseline and proposed intervention:\nRelevant system, model, data, and tool versions:\nComparison method and conditions held stable:\nPrimary outcome and acceptance definition:\nGuardrails, operating cost, and human effort:\nPlanned analysis and local revision rule:\n\n## Evidence and recommendation\nRuns, failures, deviations, and evidence locations:\nObserved difference, variability, and competing explanations:\nScope limits and unresolved questions:\nDecision: retain / modify / investigate / stop\nReason, owner, and conditions for reconsideration:\n',
+      completion: 'Leave with a recommendation at the scope of the evidence, including an explicit account of what would make the team reconsider it.',
+      limit: 'A useful local comparison supports a local decision under the examined conditions. It does not establish a universal rule or justify expanding production authority without appropriate controls.'
+    },
     sourceNotes: ['ai-engineering/coding-agents/coding-agent-experimentation-primer.md', 'ai-engineering/working-assumptions.md', 'ai-engineering/retrieval/retrieval-design.md'],
     sections: [
       {
@@ -303,6 +388,23 @@ export const techNotes = [
     category: 'Evaluation',
     standfirst: 'Define one narrow criterion, identify its evidence, and validate the judgment mechanism before using its output to influence releases or live behavior.',
     tags: ['Automated evaluators', 'LLM judges', 'Release evidence'],
+    practical: {
+      question: 'What must be clear before automating a judgment?',
+      answer: 'Define one product criterion, when it applies, its required evidence, and pass, fail, not-applicable, and unknown outcomes. Choose a fitting mechanism, validate it against reviewed cases, and separately define the action its result may influence.',
+      useWhen: 'Use this when a recurring product judgment is costly or inconsistent enough to warrant automation. Clarify disputed intent and missing observations before treating a judge’s output as release evidence.',
+      title: 'Specify an evaluator and its decision use',
+      intro: 'Separate the product rule, the judgment mechanism, and the action policy. Review disagreement where it could change the decision.',
+      checks: [
+        'State one criterion, its owner, applicability, required evidence, and all four judgment outcomes.',
+        'Choose code for exact structured rules where appropriate; give semantic judgments a narrow criterion and relevant evidence.',
+        'Validate with reviewed clear cases, boundaries, successful contrasts, and insufficient-evidence cases; preserve adjudication and challenge cases.',
+        'Inspect false passes, false failures, unknowns, and important subgroups separately, with versions and denominators visible.',
+        'Define the downstream action, failure handling, review owner, and revalidation triggers; enforce exact permissions independently where possible.'
+      ],
+      record: '# Automated evaluator specification\n\nCriterion, version, and product owner:\nDecision this evidence will inform:\nApplies when:\nRequired evidence:\nPass condition:\nFail condition:\nNot-applicable condition:\nUnknown condition:\n\n## Mechanism and validation\nImplementation, evaluator, model, and prompt versions:\nReviewed label set and adjudication process:\nSeparate development and challenge cases:\nFalse passes, false failures, unknowns, and relevant segments:\nEvidence retained for each judgment:\n\n## Use and maintenance\nDeclared set or sample, denominator, and exclusions:\nDecision rule and responsible reviewer:\nHandling of missing evidence or evaluator failure:\nExact controls enforced outside the judge:\nRevalidation triggers, owner, and review date:\n',
+      completion: 'Leave with a versioned criterion, evidence about the evaluator’s errors and limits, and a clear account of how its output may affect a named decision.',
+      limit: 'Evaluator agreement alone cannot establish product benefit. A changed judge can change a score without a change in product behavior, and probabilistic judgments do not enforce exact action permissions.'
+    },
     sourceNotes: ['ai-engineering/evaluation/v2/Operationalising Product Behaviour with Automated Evaluators.md', 'ai-engineering/evaluation/v2/ai-evaluation.md', 'ai-engineering/evaluation/v2/failure-understanding.md'],
     sections: [
       {
