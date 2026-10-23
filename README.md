@@ -46,12 +46,16 @@ The workflows follow the same build and deployment structure as the companion we
 - `.github/workflows/ci.yml` validates pull requests and non-`main` pushes, including a build under a repository subpath.
 - `.github/workflows/deploy.yml` verifies pushes to `main`, uploads only `dist/`, then deploys through the `github-pages` environment. Manual runs can deploy `main` as well.
 
-For the first deployment:
+The public source repository is [valery-judah/eml](https://github.com/valery-judah/eml), and Pages publishes [eml.systems](https://eml.systems/). GitHub Actions is the configured publishing source; pushing `main` runs verification and deploys the resulting static artifact. Inspect releases in [Actions](https://github.com/valery-judah/eml/actions/workflows/deploy.yml) and the custom domain in [Pages settings](https://github.com/valery-judah/eml/settings/pages).
 
-1. Connect this checkout to its intended GitHub repository and push the source.
-2. In the repository's **Settings → Pages**, choose **GitHub Actions** as the build and deployment source.
-3. Set the confirmed custom domain, **eml.systems**, in Pages settings and configure its DNS for that repository. Enable HTTPS when GitHub makes it available.
-4. Run the deployment workflow, or push a subsequent change to `main`. Its deployment environment links to the published URL.
+Porkbun manages the domain's DNS. The website uses these records, with a 600-second TTL:
+
+| Type | Host | Target |
+| --- | --- | --- |
+| `ALIAS` | `@` | `valery-judah.github.io` |
+| `CNAME` | `www` | `valery-judah.github.io` |
+
+The apex uses Porkbun's CNAME flattening; `www` follows GitHub Pages' redirect to the configured apex domain. Mail records are managed separately. If migrating hosting, update the web records together with the Pages custom-domain setting. GitHub provisions the HTTPS certificate after DNS validation; HTTPS enforcement requires an issued certificate.
 
 The build uses the base URL reported by `actions/configure-pages`. Before a custom domain is configured, it also works at a project URL such as `https://OWNER.github.io/REPOSITORY/`. See [GitHub's custom workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) and [custom domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site).
 
