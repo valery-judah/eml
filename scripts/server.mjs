@@ -2,8 +2,8 @@ import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { projectRoot, renderArticle, renderSitemap } from './render.mjs';
-import { articles } from '../content/articles.mjs';
+import { projectRoot, renderArticle, renderCollection, renderSitemap, renderFeed, renderHomepage, renderProblems } from './render.mjs';
+import { collections, findPublication } from '../content/catalog.mjs';
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.xml': 'application/xml; charset=utf-8', '.txt': 'text/plain; charset=utf-8' };
 
@@ -24,16 +24,35 @@ export function createSiteServer({ production = false } = {}) {
         response.writeHead(200, { 'Content-Type': MIME['.xml'] }).end(request.method === 'HEAD' ? undefined : renderSitemap());
         return;
       }
-      const article = articles.find(item => pathname === `/writing/${item.slug}/` || pathname === `/writing/${item.slug}/index.html` || pathname === `/writing/${item.slug}`);
-      if (article && pathname === `/writing/${article.slug}`) {
-        response.writeHead(308, { Location: `/writing/${article.slug}/` }).end();
+      if (!production && pathname === '/feed.xml') {
+        response.writeHead(200, { 'Content-Type': MIME['.xml'] }).end(request.method === 'HEAD' ? undefined : renderFeed());
+        return;
+      }
+      if (!production && ['/', '/index.html'].includes(pathname)) {
+        response.writeHead(200, { 'Content-Type': MIME['.html'] }).end(request.method === 'HEAD' ? undefined : await renderHomepage());
+        return;
+      }
+      const article = findPublication(pathname);
+      const problemsPage = ['/problems', '/problems/', '/problems/index.html'].includes(pathname);
+      const collection = Object.entries(collections).find(([, item]) => pathname === item.route || pathname === `${item.route}index.html` || pathname === item.route.slice(0, -1));
+      const canonicalRoute = article?.route || collection?.[1].route || (problemsPage ? '/problems/' : null);
+      if (canonicalRoute && pathname === canonicalRoute.slice(0, -1)) {
+        response.writeHead(308, { Location: `${canonicalRoute}${new URL(request.url, 'http://localhost').search}` }).end();
         return;
       }
       if (!production && article) {
         response.writeHead(200, { 'Content-Type': MIME['.html'] }).end(request.method === 'HEAD' ? undefined : await renderArticle(article));
         return;
       }
-      const allowed = pathname === '/' || ['/index.html', '/styles.css', '/main.js', '/404.html', '/robots.txt', '/sitemap.xml'].includes(pathname) || /^\/assets\/[\w.-]+$/.test(pathname) || Boolean(article);
+      if (!production && problemsPage) {
+        response.writeHead(200, { 'Content-Type': MIME['.html'] }).end(request.method === 'HEAD' ? undefined : await renderProblems());
+        return;
+      }
+      if (!production && collection) {
+        response.writeHead(200, { 'Content-Type': MIME['.html'] }).end(request.method === 'HEAD' ? undefined : await renderCollection(collection[0]));
+        return;
+      }
+      const allowed = pathname === '/' || ['/index.html', '/styles.css', '/main.js', '/404.html', '/robots.txt', '/sitemap.xml', '/feed.xml'].includes(pathname) || /^\/assets\/[\w.-]+$/.test(pathname) || Boolean(article) || Boolean(collection) || problemsPage;
       if (!allowed) throw new Error('Not found');
       let filename = path.join(root, pathname);
       if ((await stat(filename)).isDirectory()) filename = path.join(filename, 'index.html');
