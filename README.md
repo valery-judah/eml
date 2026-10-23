@@ -57,7 +57,7 @@ Porkbun manages the domain's DNS. The website uses these records, with a 600-sec
 
 The apex uses Porkbun's CNAME flattening; `www` follows GitHub Pages' redirect to the configured apex domain. Mail records are managed separately. If migrating hosting, update the web records together with the Pages custom-domain setting. GitHub provisions the HTTPS certificate after DNS validation; HTTPS enforcement requires an issued certificate.
 
-The build uses the base URL reported by `actions/configure-pages`. Before a custom domain is configured, it also works at a project URL such as `https://OWNER.github.io/REPOSITORY/`. See [GitHub's custom workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) and [custom domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site).
+The deployment build uses the base URL reported by `actions/configure-pages`, normalized to HTTPS so canonical URLs remain correct during certificate provisioning. Before a custom domain is configured, it also works at a project URL such as `https://OWNER.github.io/REPOSITORY/`. See [GitHub's custom workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) and [custom domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site).
 
 `site.config.mjs` owns the default production URL. An explicit `SITE_URL` changes page links, stylesheet imports, canonical/social/structured metadata, RSS, sitemap, 404 links, and robots output together:
 

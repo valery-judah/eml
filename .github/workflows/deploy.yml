@@ -26,7 +26,11 @@ jobs:
       - name: Verify and build for the configured Pages URL
         env:
           SITE_URL: ${{ steps.pages.outputs.base_url }}
-        run: npm run verify
+        run: |
+          # Pages can report HTTP while a new domain's certificate is pending.
+          # Published metadata should use the final HTTPS URL throughout.
+          export SITE_URL="${SITE_URL/#http:/https:}"
+          npm run verify
       - name: Upload the verified static website
         uses: actions/upload-pages-artifact@v4
         with:
