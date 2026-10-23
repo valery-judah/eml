@@ -9,7 +9,7 @@ import { pricing } from '../content/pricing.mjs';
 const destination = path.join(projectRoot, 'dist');
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
-for (const file of ['index.html', 'styles.css', 'theme.css', 'theme.js', 'main.js', 'assets', '404.html']) {
+for (const file of ['index.html', 'styles.css', 'theme.css', 'theme.js', 'main.js', 'contact.js', 'assets', '404.html']) {
   await cp(path.join(projectRoot, file), path.join(destination, file), { recursive: true });
 }
 await renderWriting(destination);
@@ -21,4 +21,4 @@ await writeFile(path.join(destination, 'styles.css'), withStylePaths(await readF
 await writeFile(path.join(destination, 'robots.txt'), renderRobots());
 await writeFile(path.join(destination, '.nojekyll'), '');
 if (site.customDomain) await writeFile(path.join(destination, 'CNAME'), `${site.customDomain}\n`);
-console.log(`Built EML Systems: homepage, client problems, working together, pricing and ${pricing.offers.length} engagement pages, ${workProducts.length} illustrative work products, ${collections.papers.entries.length} papers, ${collections.notes.entries.length} technical notes, ${collections.blog.entries.length} blog essays, collection pages, and RSS → dist/ (${site.url})`);
+console.log(`Built EML Systems: homepage, contact & team, client problems, working together, pricing and ${pricing.offers.length} engagement pages, ${workProducts.length} illustrative work products, ${collections.papers.entries.length} papers, ${collections.notes.entries.length} technical notes, ${collections.blog.entries.length} blog essays, collection pages, and RSS → dist/ (${site.url})`);

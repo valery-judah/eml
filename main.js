@@ -36,47 +36,6 @@ document.querySelectorAll('.process-trigger').forEach(trigger => {
   });
 });
 
-const dialog = document.querySelector('#enquiry-dialog');
-const interest = document.querySelector('#enquiry-interest');
-const status = document.querySelector('#enquiry-status');
-
-function openEnquiry(topic) {
-  if (!dialog) return;
-  if (status) status.textContent = '';
-  if (topic && interest) interest.value = topic;
-  dialog.showModal();
-  document.body.classList.add('dialog-open');
-}
-
-document.querySelectorAll('[data-open-enquiry], [data-enquiry]').forEach(button => {
-  button.addEventListener('click', event => {
-    if (!dialog) return;
-    event.preventDefault();
-    openEnquiry(button.dataset.enquiry);
-  });
-});
-
-document.querySelector('[data-close-enquiry]')?.addEventListener('click', () => dialog.close());
-dialog?.addEventListener('close', () => document.body.classList.remove('dialog-open'));
-dialog?.addEventListener('click', event => {
-  const rect = dialog.getBoundingClientRect();
-  if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
-});
-
-document.querySelector('#enquiry-form')?.addEventListener('submit', event => {
-  event.preventDefault();
-  const data = new FormData(event.currentTarget);
-  const subject = `EML Systems enquiry — ${data.get('interest')}`;
-  const body = `Hi EML Systems,\n\n${data.get('message')}\n\nInterested in: ${data.get('interest')}\n\n${data.get('name')}\n${data.get('email')}`;
-  const href = `mailto:hello@eml.systems?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = href;
-  status.replaceChildren(document.createTextNode('Your email draft is ready. If your email app didn’t open, '));
-  const fallback = document.createElement('a');
-  fallback.href = href;
-  fallback.textContent = 'open the draft here';
-  status.append(fallback, document.createTextNode(' or email hello@eml.systems directly.'));
-});
-
 document.querySelectorAll('[data-year]').forEach(item => { item.textContent = new Date().getFullYear(); });
 
 if ('IntersectionObserver' in window) {

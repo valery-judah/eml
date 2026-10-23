@@ -94,7 +94,7 @@ test('JSON offers stay consistent across homepage, working-together, complete pa
     for (const id of offer.journeyIds) assert.ok(detail.includes(`href="${publicPath(`${workingTogether.route}#${id}`)}"`));
     assert.ok(detail.includes(`href="${site.root}${route}"`));
     assert.ok(sitemap.includes(`<loc>${site.root}${route}</loc>`));
-    assert.ok(detail.includes(`subject=${encodeURIComponent(`EML Systems — ${offer.title}: scope and fee`)}`), 'enquiries must identify the engagement');
+    assert.ok(detail.includes(`href="${publicPath(`/contact/?topic=${encodeURIComponent(`${offer.title}: scope and fee`)}`)}"`), 'enquiries must carry the engagement into the contact brief');
   }
 });
 

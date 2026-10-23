@@ -34,7 +34,7 @@ function setup({ stored = null, dark = false, blocked = false, readyState = 'loa
   };
   vm.runInNewContext(source, {
     document, window,
-    getComputedStyle: () => ({ getPropertyValue: () => root.dataset.theme === 'dark' ? '#171c18' : '#f6f4ee' })
+    getComputedStyle: () => ({ getPropertyValue: () => root.dataset.theme === 'dark' ? '#171d26' : '#f3f5f7' })
   });
   return {
     root, meta, select, control,
@@ -50,14 +50,14 @@ function setup({ stored = null, dark = false, blocked = false, readyState = 'loa
 test('device appearance is selected before controls exist and stays live in Auto mode', () => {
   const page = setup({ dark: true });
   assert.equal(page.root.dataset.theme, 'dark', 'the body must not paint in the wrong theme first');
-  assert.equal(page.meta.content, '#171c18');
+  assert.equal(page.meta.content, '#171d26');
   assert.equal(page.control.hidden, true);
   page.ready();
   assert.equal(page.control.hidden, false);
   assert.equal(page.select.value, 'system');
   page.systemChange(false);
   assert.equal(page.root.dataset.theme, 'light');
-  assert.equal(page.meta.content, '#f6f4ee');
+  assert.equal(page.meta.content, '#f3f5f7');
 });
 
 test('explicit choice persists across loads and Auto resumes device appearance', () => {

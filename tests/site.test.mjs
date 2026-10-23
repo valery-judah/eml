@@ -493,29 +493,36 @@ test('internal links, assets, SVG references, and interactive targets all resolv
   assert.ok(checkedReferences > 0, 'the reference audit did not inspect any internal URLs');
 });
 
-test('every service and engagement enquiry maps to one real form option', () => {
-  const html = documents.get('index.html');
-  const select = html.match(/<select\b([^>]*)>([\s\S]*?)<\/select>/g)
-    ?.find(element => attributes(element.match(/^<select\b([^>]*)>/)[1]).id === 'enquiry-interest');
-  assert.ok(select, 'the enquiry interest selector must be published');
-  const optionValues = [...select.matchAll(/<option\b([^>]*)>([\s\S]*?)<\/option>/g)]
-    .map(([, attrs, label]) => attributes(attrs).value ?? textOf(label));
-  assert.ok(optionValues.length > 1, 'the enquiry form needs a choice of topics');
-  assert.ok(optionValues.every(value => value.trim()), 'empty enquiry options cannot be selected reliably');
-  assert.equal(new Set(optionValues).size, optionValues.length, 'duplicate enquiry option values');
-
-  const enquiryLinks = tags(html).filter(tag => 'data-enquiry' in tag.attrs);
-  assert.ok(enquiryLinks.length > 0, 'service and engagement enquiry links must exist');
-  for (const link of enquiryLinks) {
-    assert.ok(optionValues.includes(link.attrs['data-enquiry']), `unknown enquiry topic: ${link.attrs['data-enquiry']}`);
-    assert.equal(link.attrs.href, '#contact', 'enquiry links need a useful destination when scripting is unavailable');
+test('contact is discoverable and enquiries preserve the service context', () => {
+  const home = documents.get('index.html');
+  const html = documents.get('contact/index.html');
+  assert.ok(html, 'the contact page must be published');
+  assert.equal(structuredData(html)['@type'], 'ContactPage');
+  assert.equal((html.match(/<h1\b/g) || []).length, 1);
+  for (const document of [home, html]) {
+    const navigation = document.match(/<nav id="main-nav"[\s\S]*?<\/nav>/)[0];
+    assert.ok(tags(navigation).some(tag => tag.attrs.href === publicPath('/contact/')));
   }
-  const form = html.match(/<form\b[^>]*id="enquiry-form"[\s\S]*?<\/form>/)?.[0];
-  assert.ok(form, 'the enquiry form must be published');
+  assert.ok(tags(html).some(tag => tag.attrs.href === publicPath('/contact/') && tag.attrs['aria-current'] === 'page'));
+  const services = tags(home).filter(tag => tag.attrs.href?.includes('/contact/?route='));
+  assert.equal(services.length, 3);
+  for (const link of services) {
+    const url = new URL(link.attrs.href, site.url);
+    assert.ok(['direction', 'architecture', 'engineering'].includes(url.searchParams.get('route')));
+    assert.ok(url.searchParams.get('topic'), 'service context must survive navigation');
+  }
+  const form = html.match(/<form\b[^>]*data-contact-form[\s\S]*?<\/form>/)?.[0];
+  assert.ok(form, 'the guided contact brief must be published');
   const fields = tags(form).filter(tag => ['input', 'select', 'textarea'].includes(tag.name));
-  assert.deepEqual(new Set(fields.map(field => field.attrs.name)), new Set(['name', 'email', 'interest', 'message']));
+  assert.deepEqual(new Set(fields.map(field => field.attrs.name)), new Set(['topic', 'name', 'email', 'company', 'timing', 'message']));
   assert.ok(fields.some(field => field.attrs.name === 'email' && field.attrs.type === 'email'));
-  assert.match(form, /hello@eml\.systems/, 'visitors need the enquiry recipient before opening a draft');
+  assert.deepEqual(fields.filter(field => field.attrs.type === 'radio').map(field => field.attrs.value), ['direction', 'architecture', 'engineering']);
+  const emails = tags(html).filter(tag => tag.attrs.href?.startsWith('mailto:')).map(tag => tag.attrs.href);
+  for (const email of ['hello', 'valery', 'architecture', 'engineering']) assert.ok(emails.includes(`mailto:${email}@eml.systems`));
+  assert.ok(tags(html).some(tag => tag.attrs.id === 'team'), 'the team section needs a stable direct link');
+  assert.match(html, /Nothing is submitted on this page/);
+  assert.match(html, /This has not been sent/);
+  assert.match(html, /<noscript>/, 'direct contacts must stay useful without JavaScript');
 });
 
 test('article content remains text in HTML and cannot break out of structured metadata', async () => {
@@ -629,7 +636,7 @@ test('every page selects its theme in the head and all site headers offer the sa
 });
 
 test('deployment contains public artifacts only, without notes, source modules, or local paths', () => {
-  const publicFiles = new Set(['index.html', '404.html', 'styles.css', 'theme.css', 'theme.js', 'main.js', 'robots.txt', 'sitemap.xml', 'feed.xml', '.nojekyll', ...(site.customDomain ? ['CNAME'] : []), ...servicePages.map(page => fileFor(page.route)), ...Object.values(collections).map(collection => fileFor(collection.route)), ...publications.map(entry => fileFor(entry.route))]);
+  const publicFiles = new Set(['index.html', '404.html', 'styles.css', 'theme.css', 'theme.js', 'main.js', 'contact.js', 'robots.txt', 'sitemap.xml', 'feed.xml', '.nojekyll', ...(site.customDomain ? ['CNAME'] : []), ...servicePages.map(page => fileFor(page.route)), ...Object.values(collections).map(collection => fileFor(collection.route)), ...publications.map(entry => fileFor(entry.route))]);
   const privateSources = [...new Set([...publications.flatMap(entry => entry.sourceNotes || []), ...clientProblems.sourceNotes])];
   assert.ok(privateSources.length > 0, 'private source references must be represented in this audit');
   for (const file of inventory) {

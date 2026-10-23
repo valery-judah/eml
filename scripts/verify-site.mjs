@@ -50,7 +50,7 @@ try {
       checks++;
     }
   }
-  for (const route of ['/styles.css', '/theme.css', '/theme.js', '/main.js', '/assets/system.svg', '/assets/social-card.jpg', '/sitemap.xml', '/feed.xml', '/robots.txt', '/.nojekyll', ...(site.customDomain ? ['/CNAME'] : [])]) {
+  for (const route of ['/styles.css', '/theme.css', '/theme.js', '/main.js', '/contact.js', '/assets/system.svg', '/assets/social-card.jpg', '/sitemap.xml', '/feed.xml', '/robots.txt', '/.nojekyll', ...(site.customDomain ? ['/CNAME'] : [])]) {
     const response = await request(route, { method: 'HEAD' });
     assert.equal(response.status, 200, `Missing public asset: ${route}`);
     assert.equal(await response.text(), '');

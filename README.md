@@ -70,11 +70,12 @@ Use the same value for a build and its local preview. The build emits `.nojekyll
 
 ## Edit the site
 
-- `index.html`: homepage copy, services, engagements, and enquiry form.
+- `index.html`: homepage copy, services, engagements, and contact entry points.
 - `theme.css`: shared style configuration: semantic colors, fonts, type scale, spacing, dimensions, borders, focus, and motion.
 - `styles.css`: layout and components that consume the configuration, plus responsive and print rules.
 - `theme.js`: theme selection before first paint, device preference, and persistent user choice.
-- `main.js`: mobile navigation, approach accordion, and enquiry dialog.
+- `main.js`: mobile navigation, approach accordion, and publication controls.
+- `contact.js`: public contact routes and the guided email brief, draft preview, and copy fallback.
 - `content/tech-notes.mjs`: six practical technical references with examples and code.
 - `content/papers.mjs`: three full technical position papers with abstracts, arguments, hypothetical cases, counterarguments, limitations, methods, and annotated primary references.
 - `content/client-problems.mjs`: the motivation behind the practice and six client situations, diagnostic questions, work products, and decisions.
@@ -93,7 +94,9 @@ Use the same value for a build and its local preview. The build emits `.nojekyll
 - `scripts/verify-site.mjs`: the shared production build, tests, artifact checks, and HTTP verification.
 - `assets/system.svg`: original vector illustration.
 
-The site uses system fonts and makes no third-party font, analytics, or script requests. The enquiry form opens a prefilled email draft to **hello@eml.systems**; the visitor sends it from their email application. It does not store submissions or claim that a message has been delivered.
+The site uses system fonts and makes no third-party font, analytics, or script requests. `/contact/` is the main enquiry page, with three starting points, a short project brief, and a principal and team section at `/contact/#team`. The selected starting point addresses the draft to **hello@eml.systems**, **architecture@eml.systems**, or **engineering@eml.systems**. **valery@eml.systems** is the direct principal contact. These addresses forward to the existing Gmail inbox; the site does not reveal the destination inbox.
+
+The brief prepares an email for review on the page. Visitors open it in their email application or copy it into webmail, then send it themselves. Nothing is submitted to a server, saved in browser storage, or claimed to be delivered. Editing the brief hides a previously prepared draft until it is regenerated. Without JavaScript, direct email contacts remain available. Contextual service and engagement links pass only their public topic in the URL; form details stay out of the URL. Architecture and engineering are functional contacts, not additional named staff profiles.
 
 ## Style configuration
 

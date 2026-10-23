@@ -8,6 +8,7 @@ import { workingTogether, journeyForProblem } from '../content/engagements.mjs';
 import { workProducts } from '../content/work-products.mjs';
 import { readerPathFor } from '../content/reader-paths.mjs';
 import { pricing, pricingRoute, offerRoute, formatPrice } from '../content/pricing.mjs';
+import { contactTopics } from '../contact.js';
 import { site, withSitePaths, withHomepageMetadata } from '../site.config.mjs';
 
 export const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -33,11 +34,11 @@ async function chrome(activeCollection) {
   return { header, footer: homepage.match(/    <footer class="site-footer[\s\S]*?<\/footer>/)[0] };
 }
 
-function head({ title, description, route, type = 'website', schema }) {
+function head({ title, description, route, type = 'website', schema, modules = [] }) {
   return `<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6f4ee">
+  <meta name="theme-color" content="#f3f5f7">
   <title>${escapeHtml(title)} — EML Systems</title>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${origin}${route}">
@@ -55,6 +56,7 @@ function head({ title, description, route, type = 'website', schema }) {
   <script src="/theme.js"></script>
   <link rel="alternate" type="application/rss+xml" title="EML Systems Blog" href="/feed.xml">
   <script type="module" src="/main.js"></script>
+  ${modules.map(src => `<script type="module" src="${src}"></script>`).join('\n  ')}
   <script type="application/ld+json">${safeJson(schema)}</script>
 </head>`;
 }
@@ -146,7 +148,7 @@ function renderWorkTable(table) {
 }
 
 const journeyRoute = journey => `${workingTogether.route}#${journey.id}`;
-const enquiryHref = topic => `mailto:hello@eml.systems?subject=${encodeURIComponent(`EML Systems — ${topic}`)}&body=${encodeURIComponent('Hi EML Systems,\n\nThe decision we face:\n\nWhat we have observed:\n\nWhat we would like to change:\n\n')}`;
+const enquiryHref = topic => `/contact/?topic=${encodeURIComponent(topic)}`;
 
 // Resolve editorial references before rendering so a JSON edit cannot publish a broken path.
 for (const offer of pricing.offers) {
@@ -231,7 +233,7 @@ ${header}
     </section>
     <section class="working-section working-examples" id="work-products" aria-labelledby="work-products-title"><div class="section-heading"><div><p class="eyebrow section-kicker">02 / OPEN THE WORK PRODUCT</p><h2 id="work-products-title">What does useful<br><em>work look like?</em></h2></div><p class="section-intro">Read the question, evidence, alternatives, and recommendation in full. These synthetic examples show the method and its limits.</p></div><div class="work-example-grid">${workProducts.map(exampleCard).join('')}</div></section>
     <section class="working-section working-formats" id="engagement-formats" aria-labelledby="formats-title"><div class="section-heading"><div><p class="eyebrow section-kicker">03 / SHAPE THE SUPPORT TO THE WORK</p><h2 id="formats-title">The right involvement.<br><em>Clear responsibilities.</em></h2></div><p class="section-intro">We agree on the question, outputs, scope, responsibilities, and commercial terms before starting. Changes to the commitment are reviewed together.</p></div><div class="working-format-grid">${page.formats.map(engagementFormat).join('')}</div><aside class="working-stop"><span class="sidebar-cross" aria-hidden="true">+</span><div><h3>A useful place to stop.</h3><p>An assessment should leave your team with a decision and usable reasoning. You can implement internally, narrow the ambition, or stop an approach. Known implementation work can begin directly; ongoing advisory is useful when recurring decisions warrant it.</p><a class="text-link" href="/problems/#why-act">Establish the case for acting <span aria-hidden="true">↗</span></a></div></aside></section>
-    <section class="working-contact" id="next-step" aria-labelledby="next-step-title"><div><p class="eyebrow">A GOOD FIRST CONVERSATION</p><h2 id="next-step-title">Bring the decision.<br><em>And what you know.</em></h2><p>Tell us which decision you face, what you have observed, and what you would like to change. A representative case is often a useful starting point.</p></div><div><a class="button button-primary" href="${enquiryHref('A useful next step')}">Start a conversation <span aria-hidden="true">↗</span></a><a class="working-email" href="mailto:hello@eml.systems">hello@eml.systems</a><p>Your email app opens a draft. You review and send it.</p></div></section>
+    <section class="working-contact" id="next-step" aria-labelledby="next-step-title"><div><p class="eyebrow">A GOOD FIRST CONVERSATION</p><h2 id="next-step-title">Bring the decision.<br><em>And what you know.</em></h2><p>Tell us which decision you face, what you have observed, and what you would like to change. A representative case is often a useful starting point.</p></div><div><a class="button button-primary" href="${enquiryHref('A useful next step')}">Start a conversation <span aria-hidden="true">↗</span></a><a class="working-email" href="mailto:hello@eml.systems">hello@eml.systems</a><p>Share a short brief or email us directly.</p></div></section>
   </main>
 ${footer}
 </body>
@@ -379,7 +381,44 @@ ${footer}
 </html>\n`);
 }
 
+export async function renderContact() {
+  const { header, footer } = await chrome('contact');
+  const description = 'Talk with Valery about AI product direction, architecture, and engineering. Share your situation and find a useful next step with EML Systems.';
+  const schema = { '@context': 'https://schema.org', '@type': 'ContactPage', name: 'Contact EML Systems', description, url: `${origin}/contact/`, mainEntity: { '@type': 'Organization', name: 'EML Systems', email: 'hello@eml.systems', url: `${origin}/` } };
+  return withSitePaths(`<!doctype html>
+<html lang="en">
+${head({ title: 'Contact', description, route: '/contact/', schema, modules: ['/contact.js'] })}
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+${header}
+  <main id="main" class="contact-page wrap">
+    <header class="contact-hero">
+      <div><p class="eyebrow"><span class="status-dot"></span>LET’S FIND A USEFUL NEXT STEP</p><h1>Bring the question.<br><em>We’ll work from there.</em></h1><p>A product to shape, a system to build, or something that isn’t working. Tell us where you are and what you want to change.</p><div class="contact-hero-actions"><a class="button button-primary" href="#brief">Tell us about your project <span aria-hidden="true">↓</span></a><a class="text-link" href="#team">Who you’ll work with <span aria-hidden="true">↓</span></a></div></div>
+      <aside class="contact-first-step" aria-label="How a conversation starts"><p class="eyebrow">FROM FIRST CONTACT TO CLEAR SCOPE</p><ol><li><span>01</span><div><h2>Share your context</h2><p>A few sentences are enough to begin.</p></div></li><li><span>02</span><div><h2>Talk it through</h2><p>Clarify the question, constraints, and fit.</p></div></li><li><span>03</span><div><h2>Agree a next step</h2><p>Define the work, deliverables, and fee before starting.</p></div></li></ol></aside>
+    </header>
+
+    <section class="contact-intake" id="brief" aria-labelledby="brief-title">
+      <div class="contact-section-heading"><p class="eyebrow">START A CONVERSATION</p><h2 id="brief-title">A little context.<br><em>A better first conversation.</em></h2><p>No finished brief needed. If you’re still exploring, choose the first option.</p></div>
+      <noscript><p class="contact-no-script">Email <a href="mailto:hello@eml.systems">hello@eml.systems</a> with your situation and what you’d like to change. The guided email brief requires JavaScript; all direct contacts below work without it.</p></noscript>
+      <form class="contact-form" data-contact-form hidden>
+        <fieldset class="contact-choices"><legend><span class="mono">01</span> What brings you here?</legend><div>${contactTopics.map((topic, index) => `<label class="contact-choice"><input type="radio" name="topic" value="${topic.id}"${index === 0 ? ' checked' : ''}><span><strong>${escapeHtml(topic.title)}</strong><span>${escapeHtml(topic.description)}</span></span><span class="contact-choice-mark" aria-hidden="true">↗</span></label>`).join('')}</div></fieldset>
+        <div class="contact-context" data-contact-context hidden>Continuing the conversation about: <span></span></div>
+        <fieldset class="contact-details"><legend><span class="mono">02</span> Tell us a little about the work</legend><div class="contact-field-grid"><div><label for="contact-name">Your name <span>(required)</span></label><input id="contact-name" name="name" autocomplete="name" maxlength="120" required></div><div><label for="contact-email">Your email <span>(required)</span></label><input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required></div><div><label for="contact-company">Company or website <span>(optional)</span></label><input id="contact-company" name="company" autocomplete="organization" maxlength="160"></div><div><label for="contact-timing">When are you looking to start? <span>(optional)</span></label><select id="contact-timing" name="timing"><option value="">Select a timeframe</option><option>Just exploring</option><option>Within a month</option><option>In the next 1–3 months</option><option>Later / flexible</option></select></div></div><label for="contact-message">What would you like to work through? <span>(required)</span></label><p class="contact-field-hint" id="contact-message-hint">What’s happening today, what should change, and any constraints we should know about. Please leave out confidential details for now.</p><textarea id="contact-message" name="message" rows="5" maxlength="3000" aria-describedby="contact-message-hint" required></textarea></fieldset>
+        <div class="contact-submit"><button class="button button-primary" type="submit">Prepare my email <span aria-hidden="true">↗</span></button><p>Prepare a draft to <strong data-contact-recipient>hello@eml.systems</strong>.<br>You review and send it from your email app. Nothing is submitted on this page.</p></div>
+      </form>
+      <section class="contact-draft" data-contact-draft hidden aria-labelledby="draft-title"><p class="eyebrow">03 / REVIEW & SEND</p><h3 id="draft-title" tabindex="-1">Your email is ready to review.</h3><p>This has not been sent. Open the draft in your email app, or copy it into webmail.</p><div class="contact-draft-actions"><a class="button button-primary" data-contact-open>Open email app <span aria-hidden="true">↗</span></a><button class="button button-outline" type="button" data-contact-copy>Copy email</button></div><label for="contact-preview" class="sr-only">Prepared email, ready to copy</label><textarea id="contact-preview" data-contact-preview rows="10" readonly></textarea><p class="form-status" data-contact-status role="status" aria-live="polite"></p></section>
+    </section>
+
+    <section class="contact-team" id="team" aria-labelledby="team-title"><div class="contact-section-heading"><p class="eyebrow">THE PEOPLE & THE WORK</p><h2 id="team-title">Principal-led.<br><em>Personally involved.</em></h2><p>You can start with any of these addresses. Valery receives the initial enquiry and helps shape the right approach.</p></div><div class="contact-team-grid"><article class="contact-principal"><div class="contact-person-mark" aria-hidden="true">v.</div><div><p class="eyebrow">PRINCIPAL / EML SYSTEMS</p><h3>Valery</h3><p>Product thinking, architecture, and hands-on engineering. Work directly with the person thinking through your problem and building alongside your team.</p><a class="text-link" href="mailto:valery@eml.systems">valery@eml.systems <span aria-hidden="true">↗</span></a><a class="text-link" href="https://valery.tech/" target="_blank" rel="noopener noreferrer">Writing & background <span aria-hidden="true">↗</span></a></div></article><div class="contact-role-list"><article><p class="eyebrow">AI ARCHITECTURE</p><h3>Connect the whole system.</h3><p>Discuss system design, technical choices, data flows, and integration.</p><a class="text-link" href="mailto:architecture@eml.systems">architecture@eml.systems <span aria-hidden="true">↗</span></a></article><article><p class="eyebrow">AI ENGINEERING</p><h3>Make the next version work.</h3><p>Discuss implementation, evaluation, reliability, and production issues.</p><a class="text-link" href="mailto:engineering@eml.systems">engineering@eml.systems <span aria-hidden="true">↗</span></a></article><p class="contact-role-note">We agree the people, responsibilities, and scope before an engagement begins.</p></div></div></section>
+    <aside class="contact-direct"><div><p class="eyebrow">PREFER A SIMPLE EMAIL?</p><h2>A few sentences will do.</h2><p>Send your question directly, and we can take it from there.</p></div><a class="text-link" href="mailto:hello@eml.systems">hello@eml.systems <span aria-hidden="true">↗</span></a></aside>
+  </main>
+${footer}
+</body>
+</html>\n`);
+}
+
 export const servicePages = [
+  { route: '/contact/', render: renderContact },
   { route: '/problems/', render: renderProblems },
   { route: workingTogether.route, render: renderWorkingTogether },
   { route: pricingRoute, render: renderPricing },

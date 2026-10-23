@@ -66,7 +66,7 @@ export function createSiteServer({ production = false } = {}) {
         response.writeHead(200, { 'Content-Type': MIME['.html'] }).end(request.method === 'HEAD' ? undefined : await renderCollection(collection[0]));
         return;
       }
-      const allowed = pathname === '/' || ['/index.html', '/styles.css', '/theme.css', '/theme.js', '/main.js', '/404.html', '/robots.txt', '/sitemap.xml', '/feed.xml'].includes(pathname) || (production && (pathname === '/.nojekyll' || (site.customDomain && pathname === '/CNAME'))) || /^\/assets\/[\w.-]+$/.test(pathname) || Boolean(article) || Boolean(collection) || Boolean(servicePage);
+      const allowed = pathname === '/' || ['/index.html', '/styles.css', '/theme.css', '/theme.js', '/main.js', '/contact.js', '/404.html', '/robots.txt', '/sitemap.xml', '/feed.xml'].includes(pathname) || (production && (pathname === '/.nojekyll' || (site.customDomain && pathname === '/CNAME'))) || /^\/assets\/[\w.-]+$/.test(pathname) || Boolean(article) || Boolean(collection) || Boolean(servicePage);
       if (!allowed) throw new Error('Not found');
       let filename = path.join(root, pathname);
       if ((await stat(filename)).isDirectory()) filename = path.join(filename, 'index.html');
